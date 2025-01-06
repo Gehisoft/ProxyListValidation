@@ -1,5 +1,6 @@
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 
 import java.util.HashMap;
@@ -13,7 +14,7 @@ public class ProxyList {
 
 
 
-         String countrycode = "JP";  ////////////////////////////// Proxy country and also can use all
+         String countrycode = "US";  ////////////////////////////// Proxy country and also can use all
 
 
         String url = "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=" + countrycode + "&ssl=all&anonymity=all";
@@ -33,9 +34,26 @@ public class ProxyList {
                     .formParam("ip_addr[]", line)
                     .when().post("https://api.proxyscrape.com/v4/online_check")
                     .then()
-                    .extract().response().asString();
+                    .extract().body().asString();
 
-            System.out.println("The response is " + postresponse);
+
+
+            JsonPath jpath = new JsonPath(postresponse);
+            String truefalse = jpath.getString("working").replaceAll("[\\[\\]]", "");
+            String ipvalue = jpath.getString("ip").replaceAll("[\\[\\]]", "");;
+
+
+
+            if (truefalse.equalsIgnoreCase("true")){
+
+                System.out.println(ipvalue+" This IP is working");
+            } else if (truefalse.equalsIgnoreCase("false")) {
+
+                System.out.println(ipvalue+" This IP is blocked");
+
+            }
+
+
         }
     }
 
